@@ -1,0 +1,13 @@
+{
+	"folders":
+	[
+		{
+			"path": "/Library/WebServer/Documents/blog"
+		}
+	],
+	"settings" : {
+		"xdebug" : {
+			"url" : "http://localhost/blog/"
+		}
+	}
+}
