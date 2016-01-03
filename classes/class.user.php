@@ -1,8 +1,8 @@
 <?php
 
-include('class.password.php');
+include('class.passwordSimple.php');
 
-class User extends Password{
+class User extends PasswordSimple {
 
     private $db;
 	
@@ -38,8 +38,8 @@ class User extends Password{
 
 		$hashed = $this->get_user_hash($username);
 		
-		if($this->password_verify($password,$hashed) == 1){
-		    
+		if ($this->password_verify($password,$hashed) == 1)
+		{ 
 		    $_SESSION['loggedin'] = true;
 		    return true;
 		}		
