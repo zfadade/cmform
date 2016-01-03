@@ -18,6 +18,24 @@ class User extends PasswordSimple {
 		}		
 	}
 
+	
+	public function login($username, $password){	
+
+		$hashed = $this->get_user_hash($username);
+		
+		if ($this->password_verify($password, $hashed) == 1)
+		{ 
+		    $_SESSION['loggedin'] = true;
+		    return true;
+		}		
+	}
+	
+		
+	public function logout(){
+		session_destroy();
+	}
+
+
 	private function get_user_hash($username){	
 
 		try {
@@ -32,24 +50,6 @@ class User extends PasswordSimple {
 		    echo '<p class="error">'.$e->getMessage().'</p>';
 		}
 	}
-
-	
-	public function login($username,$password){	
-
-		$hashed = $this->get_user_hash($username);
-		
-		if ($this->password_verify($password,$hashed) == 1)
-		{ 
-		    $_SESSION['loggedin'] = true;
-		    return true;
-		}		
-	}
-	
-		
-	public function logout(){
-		session_destroy();
-	}
-	
 }
 
 

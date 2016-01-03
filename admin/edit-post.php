@@ -29,7 +29,7 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 <div id="wrapper">
 
 	<?php include('menu.php');?>
-	<p><a href="./">Blog Admin Index</a></p>
+	<p><a href="./">Blog Admin Index</a></p>ƒ
 
 	<h2>Edit Post</h2>
 
