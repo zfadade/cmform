@@ -1,4 +1,3 @@
-Simple Blog part 1: The Build
+Carole Meyer form to email a document
 =============
 
-These files accompany the tutorial: [Creating a blog from scratch with PHP](http://daveismyname.com/creating-a-blog-from-scratch-with-php-bp)
