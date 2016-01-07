@@ -50,36 +50,32 @@ function cleanInput($data) {
 
 
 function sendMail($clientEmail, $clientName) {
-	require 'PHPMailerAutoload.php';
 
-	$my_init_data = parse_ini_file("../secure/my_php.ini");
+	$mail = setupMailHeader();
+	$mail->AddEmbeddedImage('resources/logo_CM_2016.png', 'logoimg', 'logo_CM_2016.png');
 
-	$mail = new PHPMailer;
-
-	//$mail->SMTPDebug = 3;                               // Enable verbose debug output
-
-	$mail->isSMTP();                                      // Set mailer to use SMTP
-	$mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
-	$mail->SMTPAuth = true;                               // Enable SMTP authentication
-	$mail->Username = 'zinnerab@gmail.com';               // SMTP username
-	$mail->Password = $my_init_data['zinner_ab_pass'];    // SMTP password
-	$mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
-	$mail->Port = 587;                                    // TCP port to connect to
-
-	$mail->setFrom('zinnerab@gmail.com', 'MyCompany');
+	$bodytext = <<<EOD
+    <html>
+    <body>
+    <p><img src="cid:logoimg" /></p>
+    <p>Merci pour avoir contact&eacute;
+    <span style="color:#5990B1 ;font-size:18px;font-weight:bold;"> CMCO</style></span>.</p>
+    <p> Voici le document que vous avez demand&eacute;.</p>
+    </body>
+    </html>
+EOD;
 
 	$mail->addAddress($clientEmail, $clientName);     		// Add a recipient
 	// $mail->addAddress('ellen@example.com');              // Name is optional
-	$mail->addReplyTo('zinnerab@gmail.com', 'Contact');
 	//$mail->addCC('cc@example.com');
 	//$mail->addBCC('bcc@example.com');
 
 	$mail->addAttachment('resources/LoremIpsum.pdf');         // Add attachments
 	//$mail->addAttachment('/tmp/image.jpg', 'new.jpg');     // Optional name
-	$mail->isHTML(true);                                  	// Set email format to HTML
 
 	$mail->Subject = 'Here is the document you requested';
-	$mail->Body    = 'This is the HTML message body <b>in bold!</b>';
+	//'Voici le document demand&eacute;'
+	$mail->Body    = $bodytext;
 	$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
 	if (!$mail->send()) {
@@ -88,6 +84,30 @@ function sendMail($clientEmail, $clientName) {
 	} else {
 	    echo 'Message has been sent';
 	}
+}
+
+function setupMailHeader() {
+
+	require 'PHPMailerAutoload.php';
+	$my_init_data = parse_ini_file("../secure/my_php.ini");
+
+	$mail = new PHPMailer;
+	//$mail->SMTPDebug = 3;                               // Enable verbose debug output
+	
+	$mail->isSMTP();                                      // Set mailer to use SMTP
+	$mail->Host = 'smtp.gmail.com';  					  // Specify main and backup SMTP servers
+	$mail->SMTPAuth = true;                               // Enable SMTP authentication
+	$mail->Username = $my_init_data['cmform_smtp_username']; 		// SMTP username
+	$mail->Password = $my_init_data['cmform_smtp_password'];    	// SMTP password
+	$mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+	$mail->Port = 587;                                    // TCP port to connect to
+
+	$mail->isHTML(true);                                  	// Set email format to HTML
+
+	$mail->setFrom($my_init_data['cmform_from_email'], 'MyCompany');
+	$mail->addReplyTo($my_init_data['cmform_replyto_email'], 'Contact');
+
+	return $mail;
 }
 
 
