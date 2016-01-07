@@ -35,7 +35,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	  }
 
 	  error_log("nameErr: " . $nameErr . " emailErr: " . $emailErr);
-	  // error_log("Sending an email to myself from PHP!", 1, "zinnerab@gmail.com");
 	  if (empty($nameErr) and empty($emailErr)) {
 	  	sendMail($clientEmail, $clientName);
 	  }
@@ -50,10 +49,10 @@ function cleanInput($data) {
 }
 
 
-
-
 function sendMail($clientEmail, $clientName) {
 	require 'PHPMailerAutoload.php';
+
+	$my_init_data = parse_ini_file("../secure/my_php.ini");
 
 	$mail = new PHPMailer;
 
@@ -63,7 +62,7 @@ function sendMail($clientEmail, $clientName) {
 	$mail->Host = 'smtp.gmail.com';  // Specify main and backup SMTP servers
 	$mail->SMTPAuth = true;                               // Enable SMTP authentication
 	$mail->Username = 'zinnerab@gmail.com';               // SMTP username
-	$mail->Password = 'wisH-zog-dug-an-bi-hAj-';          // SMTP password
+	$mail->Password = $my_init_data['zinner_ab_pass'];    // SMTP password
 	$mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
 	$mail->Port = 587;                                    // TCP port to connect to
 
