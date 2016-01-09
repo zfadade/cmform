@@ -1,16 +1,29 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>Carole Meyer </title>
-    <link rel="stylesheet" href="style/normalize.css">
-    <link rel="stylesheet" href="style/main.css">
-</head>
-<body>
-
 <?php
-// define variables and set to empty values
+
+// i18n:
+$language = "fr_FR";
+
+if (isset($_GET["lang"]))
+{
+    $lang = filter_input(INPUT_GET, 'lang', FILTER_SANITIZE_STRING);
+    if (strpos($lang, "en_") === 0) {
+        $language = "en_US";
+    }
+}
+
+putenv("LANG=" . $language);
+setlocale(LC_ALL, $language);
+//echo "Setting language to " . $language;
+
+// Set the text domain as "messages"
+$domain = "messages";
+bindtextdomain($domain, "locale");
+
+//bind_textdomain_codeset($domain, 'UTF-8');
+textdomain($domain);
+
+
 $clientName = $clientEmail =  $clientComment = "";
 $nameErr = $emailErr = "";
 
@@ -85,11 +98,8 @@ EOD3;
 	$bodytext .= $bodyFinish;
 
 	$mail->addAddress($clientEmail, $clientName);     		// Add a recipient
-	// $mail->addAddress('ellen@example.com');              // Name is optional
-	//$mail->addCC('cc@example.com');
 
 	$mail->addAttachment('resources/LoremIpsum.pdf');         // Add attachments
-	//$mail->addAttachment('/tmp/image.jpg', 'new.jpg');     // Optional name
 
 	$mail->Subject = 'Voici le document que vous avez demand&eacute';
 	$mail->Body    = $bodytext;
@@ -145,23 +155,33 @@ function xsendMail($to, $clientName) {
 
 ?>
 
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Carole Meyer </title>
+    <link rel="stylesheet" href="style/normalize.css">
+    <link rel="stylesheet" href="style/main.css">
+</head>
+<body>
+
 	<div id="wrapper">
 
-		<h1>Bienvenue chez Carole Meyer Formation</h1>
+		<h1><?php echo _("Bienvenue chez Carole Meyer Formation"); ?></h1>
 		<hr />
-		<p>Si vous desirez recevoir le CV de Carole Meyer envoyez-nous votre courriel</p>
+		<p><?php echo _("Recevoir CV"); ?> </p>
 		<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
-			Votre nom:
+			<?php echo _("Votre nom"); ?>
 			<input type="text" name="clientName" value="<?php echo $clientName;?>" >
 			<span class="error">* <?php echo $nameErr;?></span>
 			<br><br>
 
-			Votre courriel:
+			<?php echo _("Votre courriel"); ?>
 			<input type="text" name="clientEmail" value="<?php echo $clientEmail;?>" >
 			<span class="error">* <?php echo $emailErr;?></span>
 			<br><br>
 
-			Vos commentaires sont les bienvenus: <br>
+			<?php echo _("Vos commentaires sont les bienvenus"); ?><br>
 			<textarea name="clientComment" id="clientComment" rows="6" cols="33" maxlength="200"> </textarea>
 			<p><input type="submit" value="Envoyez"></p>
 
