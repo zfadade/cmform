@@ -1,6 +1,9 @@
 
 <?php
 
+session_start();
+require_once("includes/php_utils.php");
+
 // i18n:
 $language = "fr_FR";
 
@@ -24,37 +27,56 @@ bindtextdomain($domain, "locale");
 textdomain($domain);
 
 
-$clientName = $clientEmail =  $clientComment = "";
 $nameErr = $emailErr = "";
+$clientName = defaultVal($_SESSION, "clientName", "");
+$clientEmail = defaultVal($_SESSION, "clientEmail", "");
+$clientComment = defaultVal($_SESSION, "clientComment", "");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-	if (empty($_POST["clientName"])) {
+
+	$clientName = filter_input(INPUT_POST, 'clientName', FILTER_SANITIZE_STRING);
+	if (empty($clientName)) {
 	    $nameErr = "Votre nom est obligatoire";
 	  } else {
-	    $clientName = cleanInput($_POST["clientName"]);
-	     // check if name only contains letters and whitespace
+
 	    if (!preg_match("/^[a-zA-Z0-9 .]*$/", $clientName)) {
 	      $nameErr = "Seulement des lettres, chiffres et espace autoris&eacute;s"; 
+	      $clientName = "";
 	      //$nameErr = "Only letters, numbers and white space allowed"; 
 	    }
 	  }
 
-	if (empty($_POST["clientEmail"])) {
+	$clientEmail = filter_input(INPUT_POST, 'clientEmail', FILTER_SANITIZE_STRING);
+	if (empty($clientEmail)) {
 	    $emailErr = "Votre courriel est obligatoire";
 	  } else {
-	    $clientEmail = cleanInput($_POST["clientEmail"]);
 	    if (!filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
   			$emailErr = "Courriel invalide"; 
+  			$clientEmail = "";
 		}
 	  }
 
-	  $clientComment = cleanInput($_POST["clientComment"]);
+	  $clientComment = filter_input(INPUT_POST, 'clientComment', FILTER_SANITIZE_STRING);
 
 	  error_log("nameErr: " . $nameErr . " emailErr: " . $emailErr);
 	  if (empty($nameErr) and empty($emailErr)) {
 	  	sendMail($clientEmail, $clientName, $clientComment);
-	  }
 
+	  	// Sent mail OK; clean up everything
+		$nameErr = $emailErr = "";
+		$_SESSION["clientName"] = "";
+		$_SESSION["clientEmail"] = "";
+		$_SESSION["clientComment"] = "";
+
+		$_SESSION["thankYouName"] = $clientName;
+		header('Location: form_merci.php');
+	  }
+	  else {
+	  	// Save variables so they'll be there when form is redisplayed
+		$_SESSION["clientName"] = $clientName; 
+		$_SESSION["clientEmail"] = $clientEmail; 
+		$_SESSION["clientComment"] = $clientComment; 
+	  }
 }
 
 function cleanInput($data) {
@@ -89,7 +111,6 @@ EOD2;
 	$bodytext .= $bodyComment;
 	}
 
-
 	$bodyFinish = <<<EOD3
     </body>
     </html>
@@ -108,10 +129,10 @@ EOD3;
 	if (!$mail->send()) {
 	    echo 'Message could not be sent.';
 	    echo 'Mailer Error: ' . $mail->ErrorInfo;
+	    error_log("FAIL:  Unable to send email to ".$clientName." at ".$clientEmail." with comment ".$clientComment);
 	} else {
 	    echo 'Votre demande a &eacute;t&eacute; envoy&eacute;e';
-
-	    //echo '<script> alert("Votre demande a &eacute;t&eacute; envoy&eacute;e"); </script>';
+	    error_log("Email sent to ".$clientName." at ".$clientEmail." with comment ".$clientComment);
 	}
 }
 
@@ -139,20 +160,6 @@ function setupMailHeader() {
 
 	return $mail;
 }
-
-
-function xsendMail($to, $clientName) {
-	$subject = "Document that you requested (not yet attached, please be patient)";
-
-	$msg = "Dear " . $clientName . ":\nAs requested, here is the CV of You Know Who";
-	//define the headers we want passed. Note that they are separated with \r\n
-	$headers = "From: zinnerab@gmail.com\r\nReply-To: zinnerab@gmail.com";
-
-	error_log("Sending email to " . $to  . " msg: " . $msg . "\n");
-	$mail_sent = @mail($to, $subject, $msg, $headers);
-	echo $mail_sent ? "Mail sent" : "Mail failed";
-}
-
 ?>
 
 <!DOCTYPE html>
@@ -180,9 +187,7 @@ function xsendMail($to, $clientName) {
 			<input type="text" name="clientEmail" value="<?php echo $clientEmail;?>" >
 			<span class="error">* <?php echo $emailErr;?></span>
 			<br><br>
-
-			<?php echo _("Vos commentaires sont les bienvenus"); ?><br>
-			<textarea name="clientComment" id="clientComment" rows="6" cols="33" maxlength="200"> </textarea>
+			<textarea name="clientComment" id="clientComment" rows="6" cols="33" maxlength="200"><?php echo $clientComment;?></textarea>
 			<p><input type="submit" value="Envoyez"></p>
 
 		</form>
