@@ -9,7 +9,7 @@ $thankYouName = defaultVal($_SESSION, "thankYouName", "");
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Carole Meyer - Merci </title>
+    <title>Elorac Reyem - Merci </title>
     <link rel="stylesheet" href="style/normalize.css">
     <link rel="stylesheet" href="style/main.css">
 </head>

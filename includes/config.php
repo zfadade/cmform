@@ -2,13 +2,17 @@
 ob_start();
 session_start();
 
-//database credentials
-define('DBHOST','localhost');
-define('DBUSER','root');
-define('DBPASS','maiskrete35');
-define('DBNAME','blog_tutorial');
 
-$db = new PDO("mysql:host=".DBHOST.";port=8889;dbname=".DBNAME, DBUSER, DBPASS);
+$my_init_data = parse_ini_file("data.ini");
+$db_host = $my_init_data['cmblog_db_host'];
+$db_name = $my_init_data['cmblog_db_name'];
+$db_username = $my_init_data['cmblog_db_username'];
+$db_password = $my_init_data['cmblog_db_password'];
+
+$db = new PDO("mysql:host=".$db_host.";port=8889;dbname=".$db_name, 
+      $db_username, 
+      $db_password);
+//$db = new PDO("mysql:host=".DBHOST.";port=8889;dbname=".DBNAME, DBUSER, DBPASS);
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
