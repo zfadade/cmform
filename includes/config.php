@@ -1,6 +1,10 @@
 <?php
+
+if (!isset($_SESSION)) 
+{ 
+     session_start(); 
+} 
 ob_start();
-session_start();
 
 $my_init_data = parse_ini_file("data.ini");
 $db_host = $my_init_data['cmblog_db_host'];
@@ -20,6 +24,10 @@ date_default_timezone_set($my_init_data['default_timezone']);
 
 //load classes as needed
 function __autoload($class) {
+   my_autoload($class);
+}
+
+function my_autoload($class) {
 
    $class = strtolower($class);
 
@@ -40,8 +48,11 @@ function __autoload($class) {
    if ( file_exists($classpath)) {
       require_once $classpath;
 	}
-
 }
+
+spl_autoload_register(function($class) {
+   my_autoload($class);
+});
 
 $user = new User($db);
 ?>

@@ -1,5 +1,9 @@
 <?php
-session_start();
+if (!isset($_SESSION)) 
+{ 
+     session_start(); 
+} 
+
 require_once("includes/php_utils.php");
 
 $thankYouName = defaultVal($_SESSION, "thankYouName", "");

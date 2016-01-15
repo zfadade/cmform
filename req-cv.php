@@ -1,8 +1,11 @@
 
 <?php
-
-session_start();
+if (!isset($_SESSION)) 
+{ 
+     session_start(); 
+} 
 require_once("includes/php_utils.php");
+//require './vendor/autoload.php';
 
 // i18n:
 $language = "fr_FR";
@@ -33,6 +36,7 @@ $clientEmail = defaultVal($_SESSION, "clientEmail", "");
 $clientComment = defaultVal($_SESSION, "clientComment", "");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+	echo 'Form got submitted' . "<br>";
 
 	$clientName = filter_input(INPUT_POST, 'clientName', FILTER_SANITIZE_STRING);
 	if (empty($clientName)) {
@@ -60,7 +64,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 	  error_log("nameErr: " . $nameErr . " emailErr: " . $emailErr);
 	  if (empty($nameErr) and empty($emailErr)) {
+	  	echo 'No errors so will send mail' . "<br>";
 	  	sendMail($clientEmail, $clientName, $clientComment);
+	  	echo 'THANK YOU!' . "<br>";
 
 	  	// Sent mail OK; clean up everything
 		$nameErr = $emailErr = "";
@@ -76,6 +82,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 		$_SESSION["clientName"] = $clientName; 
 		$_SESSION["clientEmail"] = $clientEmail; 
 		$_SESSION["clientComment"] = $clientComment; 
+		$_SESSION["thankYouName"] = "";
 	  }
 }
 
@@ -89,7 +96,9 @@ function cleanInput($data) {
 
 function sendMail($clientEmail, $clientName, $clientComment) {
 
+	echo 'Setting up mail header...' . "<br>";
 	$mail = setupMailHeader();
+	echo 'Mail header set up' . "<br>";
 	$mail->AddEmbeddedImage('resources/logo_CM_2016.png', 'logoimg', 'logo_CM_2016.png');
 
 	$bodytext = <<<EOD1
@@ -125,8 +134,10 @@ EOD3;
 	$mail->Body    = $bodytext;
 	$mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
 
+
+	echo 'Calling mail->send() ...' . "<br>";;
 	if (!$mail->send()) {
-	    echo 'Message could not be sent.';
+	    echo 'Message could not be sent.'. "<br>";;
 	    echo 'Mailer Error: ' . $mail->ErrorInfo;
 	    error_log("FAIL:  Unable to send email to ".$clientName." at ".$clientEmail." with comment ".$clientComment);
 	} else {
@@ -136,11 +147,14 @@ EOD3;
 }
 
 function setupMailHeader() {
+	echo 'Hello from setupMailHeader()'. "<br>";
 
-	require 'PHPMailerAutoload.php';
-	$my_init_data = parse_ini_file("../secure/my_php.ini");
+	require 'vendor/autoload.php';
+	require_once('includes/config.php');
 
+	echo 'Instantiating new PHPMailer'. "<br>";
 	$mail = new PHPMailer;
+	echo 'Instantiated !'. "<br>";
 	//$mail->SMTPDebug = 3;                               // Enable verbose debug output
 	
 	$mail->isSMTP();                                      // Set mailer to use SMTP
