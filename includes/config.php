@@ -4,6 +4,8 @@ if (!isset($_SESSION))
 { 
      session_start(); 
 } 
+
+// TODO is this still needed ?
 ob_start();
 
 $my_init_data = parse_ini_file("data.ini");

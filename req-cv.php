@@ -1,98 +1,72 @@
 
 <?php
-if (!isset($_SESSION)) 
-{ 
-     session_start(); 
-} 
 require_once("includes/php_utils.php");
 //require './vendor/autoload.php';
 
 // i18n:
-$language = "fr_FR";
-
-if (isset($_GET["lang"]))
-{
-    $lang = filter_input(INPUT_GET, 'lang', FILTER_SANITIZE_STRING);
-    if (strpos($lang, "en_") === 0) {
-        $language = "en_US";
-    }
-}
-
-putenv("LANG=" . $language);
-setlocale(LC_ALL, $language);
-//echo "Setting language to " . $language;
-
-// Set the text domain as "messages"
-$domain = "messages";
-bindtextdomain($domain, "locale");
-
-//bind_textdomain_codeset($domain, 'UTF-8');
-textdomain($domain);
-
+$language = setLanguage();
 
 $nameErr = $emailErr = "";
 $clientName = defaultVal($_SESSION, "clientName", "");
 $clientEmail = defaultVal($_SESSION, "clientEmail", "");
 $clientComment = defaultVal($_SESSION, "clientComment", "");
 
+// The form has been submitted.  Do error correction, and act on data if it's good
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 	echo 'Form got submitted' . "<br>";
 
+	// Verify client name
 	$clientName = filter_input(INPUT_POST, 'clientName', FILTER_SANITIZE_STRING);
 	if (empty($clientName)) {
-	    $nameErr = "Votre nom est obligatoire";
+	    $nameErr = _("nom_obligatoire");
 	  } else {
 
 	    if (!preg_match("/^[a-zA-Z0-9 .]*$/", $clientName)) {
-	      $nameErr = "Seulement des lettres, chiffres et espace autoris&eacute;s"; 
+	      $nameErr = _("courriel_chars"); 
 	      $clientName = "";
 	      //$nameErr = "Only letters, numbers and white space allowed"; 
 	    }
 	  }
 
+	// Verify client email
 	$clientEmail = filter_input(INPUT_POST, 'clientEmail', FILTER_SANITIZE_STRING);
 	if (empty($clientEmail)) {
-	    $emailErr = "Votre courriel est obligatoire";
+	    $emailErr = _("courriel_obligatoire");
 	  } else {
 	    if (!filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
-  			$emailErr = "Courriel invalide"; 
+  			$emailErr = _("courriel_invalide"); 
   			$clientEmail = "";
 		}
 	  }
 
-	  $clientComment = filter_input(INPUT_POST, 'clientComment', FILTER_SANITIZE_STRING);
+	 // Client comment
+	$clientComment = filter_input(INPUT_POST, 'clientComment', FILTER_SANITIZE_STRING);
 
-	  error_log("nameErr: " . $nameErr . " emailErr: " . $emailErr);
-	  if (empty($nameErr) and empty($emailErr)) {
-	  	echo 'No errors so will send mail' . "<br>";
-	  	sendMail($clientEmail, $clientName, $clientComment);
-	  	echo 'THANK YOU!' . "<br>";
+	// Send email if data was OK
+	error_log("nameErr: " . $nameErr . " emailErr: " . $emailErr);
+	if (empty($nameErr) and empty($emailErr)) {
+		echo 'No errors so will send mail' . "<br>";
+		sendMail($clientEmail, $clientName, $clientComment);
+		echo 'THANK YOU!' . "<br>";
 
-	  	// Sent mail OK; clean up everything
+		// Sent mail OK; clean up everything
 		$nameErr = $emailErr = "";
 		$_SESSION["clientName"] = "";
 		$_SESSION["clientEmail"] = "";
 		$_SESSION["clientComment"] = "";
 
 		$_SESSION["thankYouName"] = $clientName;
+		sleep(5);    //For debugging
 		header('Location: form_merci.php');
-	  }
-	  else {
-	  	// Save variables so they'll be there when form is redisplayed
+	}
+	else {
+		// Data was bad.  Save variables so they'll be there when form is redisplayed
 		$_SESSION["clientName"] = $clientName; 
 		$_SESSION["clientEmail"] = $clientEmail; 
 		$_SESSION["clientComment"] = $clientComment; 
 		$_SESSION["thankYouName"] = "";
-	  }
+	}
 }
-
-function cleanInput($data) {
-  $data = trim($data);
-  $data = stripslashes($data);
-  $data = htmlspecialchars($data);
-  return $data;
-}
-
 
 function sendMail($clientEmail, $clientName, $clientComment) {
 
@@ -187,11 +161,13 @@ function setupMailHeader() {
 
 	<div id="wrapper">
 
-		<h1><?php echo _("Bienvenue chez Elorec Reyem"); ?></h1>
+		<h1><?php echo _("Bienvenue chez"); ?></h1>
+
+		<a href="req-cv.php?lang=fr"> <?php echo _("Francais"); ?></a>
+		<a href="req-cv.php?lang=en"> <?php echo _("Anglais"); ?> </a>
 		<hr />
 		<p><?php echo _("Recevoir CV"); ?> </p>
-		<p><?php echo _("Test Line"); ?> </p>
-		<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>">
+		<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"] . "?lang=" . $language); ?>">
 			<?php echo _("Votre nom"); ?>
 			<input type="text" name="clientName" value="<?php echo $clientName;?>" >
 			<span class="error">* <?php echo $nameErr;?></span>
@@ -201,8 +177,10 @@ function setupMailHeader() {
 			<input type="text" name="clientEmail" value="<?php echo $clientEmail;?>" >
 			<span class="error">* <?php echo $emailErr;?></span>
 			<br><br>
+			
+			<?php echo _("Commentaires"); ?>
 			<textarea name="clientComment" id="clientComment" rows="6" cols="33" maxlength="200"><?php echo $clientComment;?></textarea>
-			<p><input type="submit" value="Envoyez"></p>
+			<p><input type="submit" value="<?php echo _("Envoyez");?>"></p>
 
 		</form>
 	</div>
