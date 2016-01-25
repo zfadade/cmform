@@ -1,26 +1,32 @@
 <?php 
 require_once('../includes/config.php');
+require_once('../includes/php_utils.php');
+$language = setLanguage();
 
 //if not logged in redirect to login page
 if(!$user->is_logged_in()){ header('Location: login.php'); }
 ?>
+
 <!doctype html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <title>Admin - Add Post</title>
   <link rel="stylesheet" href="../style/normalize.css">
   <link rel="stylesheet" href="../style/main.css">
-  <script src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
+  <script src="../tinymce/js/tinymce/tinymce.min.js"></script>
+    
+
   <script>
           tinymce.init({
+          	 language: "fr_FR",
               selector: "textarea",
               plugins: [
-                  "advlist autolink lists link image charmap print preview anchor",
+                  "advlist autolink colorpicker lists link image charmap print preview anchor",
                   "searchreplace visualblocks code fullscreen",
                   "insertdatetime media table contextmenu paste"
               ],
-              toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
+              toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image  emoticons| save"
           });
   </script>
 </head>
@@ -35,13 +41,14 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 
 	<?php
 
+	if (isset($_POST['submit_save']) ) {
 	//if form has been submitted process it
-	if(isset($_POST['submit'])){
+		$publishBlog = isset($_POST['submit_post']) ? true : false;
 
-		$_POST = array_map( 'stripslashes', $_POST );
+		$formData = extractFormData($_POST);
 
 		//collect form data
-		extract($_POST);
+		extract($formData);
 
 		//very basic validation
 		if($postTitle ==''){
@@ -56,27 +63,9 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 			$error[] = 'Please enter the content.';
 		}
 
-		if(!isset($error)){
+		if(!isset($error)) {
 
-			try {
-
-				//insert into database
-				$stmt = $db->prepare('INSERT INTO blog_posts (postTitle,postDesc,postCont,postDate) VALUES (:postTitle, :postDesc, :postCont, :postDate)') ;
-				$stmt->execute(array(
-					':postTitle' => $postTitle,
-					':postDesc' => $postDesc,
-					':postCont' => $postCont,
-					':postDate' => date('Y-m-d H:i:s')
-				));
-
-				//redirect to index page
-				header('Location: index.php?action=added');
-				exit;
-
-			} catch(PDOException $e) {
-			    echo $e->getMessage();
-			}
-
+			insertIntoDb($db, $formData, $language);
 		}
 
 	}
@@ -86,6 +75,37 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 		foreach($error as $error){
 			echo '<p class="error">'.$error.'</p>';
 		}
+	}
+
+	function insertIntoDb($db, $row, $language) {
+	try {
+		var_dump($row);
+		$stmt = $language === ENGLISH ? 
+				$db->prepare('INSERT INTO blog_posts_bi (enTitle,enDesc,enContents) VALUES (:postTitle, :postDesc, :postCont)') 
+				:
+				$db->prepare('INSERT INTO blog_posts_bi (frTitle,frDesc,frContents) VALUES (:postTitle, :postDesc, :postCont)') ;
+
+		$stmt->execute(array(
+				':postTitle' => $row['postTitle'],
+				':postDesc' => $row['postDesc'],
+				':postCont' => $row['postCont']
+		));
+
+		//redirect to index page
+		header('Location: index.php?action=added');
+		exit;
+
+		} catch(PDOException $e) {
+		    echo $e->getMessage();
+			}
+
+	}
+
+	function extractFormData($submitData) {
+		$formData = array_map( 'stripslashes', $submitData);
+
+		// Need to do error checking, etc !
+		return $formData;
 	}
 	?>
 
@@ -100,7 +120,7 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 		<p><label>Content</label><br />
 		<textarea name='postCont' cols='60' rows='10'><?php if(isset($error)){ echo $_POST['postCont'];}?></textarea></p>
 
-		<p><input type='submit' name='submit' value='Submit'></p>
+		<p><input type='submit' name='submit_save' value='Save'></p>
 
 	</form>
 

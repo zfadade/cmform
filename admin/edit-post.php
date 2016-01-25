@@ -1,17 +1,21 @@
 <?php 
 require_once('../includes/config.php');
+require_once("../includes/php_utils.php");
 
 //if not logged in redirect to login page
 if(!$user->is_logged_in()){ header('Location: login.php'); }
+
+// i18n:
+$language = setLanguage();
 ?>
 <!doctype html>
-<html lang="en">
+<html>
 <head>
   <meta charset="utf-8">
   <title>Admin - Edit Post</title>
   <link rel="stylesheet" href="../style/normalize.css">
   <link rel="stylesheet" href="../style/main.css">
-  <script src="//tinymce.cachefly.net/4.0/tinymce.min.js"></script>
+  <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
   <script>
           tinymce.init({
               selector: "textarea",
@@ -29,7 +33,7 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 <div id="wrapper">
 
 	<?php include('menu.php');?>
-	<p><a href="./">Blog Admin Index</a></p>ƒ
+	<p><a href="./">Blog Admin Index</a></p>
 
 	<h2>Edit Post</h2>
 
@@ -37,8 +41,14 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 	<?php
 
 	//if form has been submitted process it
-	if(isset($_POST['submit'])){
+	//if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	if (isset($_POST['update']) or isset($_POST['updateAndPost']) )  {
 
+		// echo "SERVER  " . '<bp>';
+		// var_dump($_SERVER);
+
+		echo  "POST ". '<bp>';
+		var_dump($_POST);
 		$_POST = array_map( 'stripslashes', $_POST );
 
 		//collect form data
@@ -65,13 +75,19 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 
 			try {
 
+				echo "Updating form for ", $language;
+				$stmt = $language === ENGLISH ? 
+					$db->prepare('UPDATE blog_posts_bi SET enTitle = :postTitle, enDesc = :postDesc, enContents = :postCont WHERE postID = :postID') 
+					:
+					$db->prepare('UPDATE blog_posts_bi SET frTitle = :postTitle, frDesc = :postDesc, frContents= :postCont WHERE postID = :postID') ;
+
+
 				//insert into database
-				$stmt = $db->prepare('UPDATE blog_posts SET postTitle = :postTitle, postDesc = :postDesc, postCont = :postCont WHERE postID = :postID') ;
 				$stmt->execute(array(
-					':postTitle' => $postTitle,
-					':postDesc' => $postDesc,
-					':postCont' => $postCont,
-					':postID' => $postID
+					'postTitle' => $postTitle,
+					'postDesc' => $postDesc,
+					'postCont' => $postCont,
+					'postID' => $postID
 				));
 
 				//redirect to index page
@@ -86,10 +102,8 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 
 	}
 
-	?>
+	// END OF SUBMIT[] code .......
 
-
-	<?php
 	//check for any errors
 	if(isset($error)){
 		foreach($error as $error){
@@ -97,31 +111,38 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 		}
 	}
 
-		try {
+	echo "Getting row for postID: ", $_GET['id'], '<br>';
+	try {
 
-			$stmt = $db->prepare('SELECT postID, postTitle, postDesc, postCont FROM blog_posts WHERE postID = :postID') ;
-			$stmt->execute(array(':postID' => $_GET['id']));
-			$row = $stmt->fetch(); 
+		$stmt = $db->prepare('SELECT * FROM blog_posts_bi WHERE postID = :postID');
+		$stmt->bindParam(':postID', $_GET['id']);
+		$stmt->execute();
+		$stmt->setFetchMode(PDO::FETCH_CLASS, 'BlogEntry');
+		$row = $stmt->fetch();
+		var_dump($row);
 
-		} catch(PDOException $e) {
-		    echo $e->getMessage();
-		}
+	} catch(PDOException $e) {
+	    echo $e->getMessage();
+	}
 
 	?>
 
-	<form action='' method='post'>
-		<input type='hidden' name='postID' value='<?php echo $row['postID'];?>'>
+	<form method='post' action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>"> 
+		<input type='hidden' name='postID' value='<?php echo $row->getPostId() ;?>'/>
 
 		<p><label>Title</label><br />
-		<input type='text' name='postTitle' value='<?php echo $row['postTitle'];?>'></p>
+		<input type='text' name='postTitle' value='<?php echo $row->getTitle($language) ;?>'></p>
 
 		<p><label>Description</label><br />
-		<textarea name='postDesc' cols='60' rows='10'><?php echo $row['postDesc'];?></textarea></p>
+		<textarea name='postDesc' cols='60' rows='10'><?php echo $row->getDescription($language) ;?></textarea></p>
 
 		<p><label>Content</label><br />
-		<textarea name='postCont' cols='60' rows='10'><?php echo $row['postCont'];?></textarea></p>
+		<textarea name='postCont' cols='60' rows='10'><?php echo $row->getContents($language)?></textarea></p>
 
-		<p><input type='submit' name='submit' value='Update'></p>
+		<p>
+		<input type='submit' name='update' value='Update'>
+		<input type='submit' name='updateAndPost' value='Update and Post'>
+		</p>
 
 	</form>
 

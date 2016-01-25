@@ -7,6 +7,7 @@ if (!isset($_SESSION))
 # Define program-wide constanats
 define("FRENCH", "fr");
 define("ENGLISH", "en");
+define("BLOGUE", "BLOGUE_");
 
 // For now, set the locale every time.  May get smarter later
 function setLanguage() {
@@ -42,6 +43,11 @@ function setLanguage() {
 
 function defaultVal($array, $key, $default) {
     return isset($array[$key]) ? $array[$key] : $default;
+}
+
+
+function getBlogId($postId) {
+    return BLOGUE . $postId;
 }
 
 // Is this needed?  Or is filter_input() sufficient ?

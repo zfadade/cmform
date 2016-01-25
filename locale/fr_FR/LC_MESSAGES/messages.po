@@ -1,41 +1,87 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR EnfinWeb
+# This file is distributed under the same license as the CMform package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: cmform\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-09 12:13-0500\n"
-"PO-Revision-Date: 2016-01-09 12:23-0500\n"
-"Language: fr_FR\n"
+"Project-Id-Version: CMform 0.1\n"
+"Report-Msgid-Bugs-To: zfadade@yahoo.com\n"
+"POT-Creation-Date: 2016-01-12 08:39-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"X-Generator: Poedit 1.8.6\n"
-"X-Poedit-KeywordsList: _\n"
-"X-Poedit-Basepath: ../../..\n"
-"X-Poedit-SearchPath-0: .\n"
+
+#: index.php:179 /Library/WebServer/Documents/cmform/index.php:178
+#: /Library/WebServer/Documents/cmform/req-cv.php:168
+#: /Library/WebServer/Documents/cmform/req-cv.php:169
+msgid "Recevoir CV"
+msgstr ""
+"Si vous desirez recevoir le CV de Elorac Reyem envoyez-nous votre courriel"
+
+#: index.php:186 /Library/WebServer/Documents/cmform/index.php:186
+#: /Library/WebServer/Documents/cmform/req-cv.php:175
+#: /Library/WebServer/Documents/cmform/req-cv.php:176
+msgid "Votre courriel"
+msgstr ""
 
 #: index.php:181 /Library/WebServer/Documents/cmform/index.php:181
-msgid "Bienvenue chez Carole Meyer Formation"
-msgstr "Bienvenue chez Carole Meyer Formation"
-
-#: index.php:186 test.php:25 /Library/WebServer/Documents/cmform/index.php:186
+#: /Library/WebServer/Documents/cmform/req-cv.php:170
+#: /Library/WebServer/Documents/cmform/req-cv.php:171
 msgid "Votre nom"
-msgstr "Votre nom"
+msgstr ""
 
-#: index.php:191 /Library/WebServer/Documents/cmform/index.php:191
-msgid "Votre courriel"
-msgstr "Votre courriel"
+#: /Library/WebServer/Documents/cmform/req-cv.php:164
+msgid "Bienvenue chez"
+msgstr "Bienvenue chez CM Formation"
 
-#: index.php:196 /Library/WebServer/Documents/cmform/index.php:196
-msgid "Vos commentaires sont les bienvenus"
-msgstr "Vos commentaires sont les bienvenus"
+#: /Library/WebServer/Documents/cmform/req-cv.php:166
+msgid "Francais"
+msgstr "Fran&ccedil;ais"
 
-#: /Library/WebServer/Documents/cmform/index.php:184
-msgid "Recevoir CV"
-msgstr "Si vous desirez recevoir le CV de Carole Meyer envoyez-nous votre courriel"
+#: /Library/WebServer/Documents/cmform/req-cv.php:167
+msgid "Anglais"
+msgstr ""
+
+#: /Library/WebServer/Documents/cmform/req-cv.php:181
+msgid "Commentaires"
+msgstr ""
+
+#: /Library/WebServer/Documents/cmform/req-cv.php:183
+msgid "Envoyez"
+msgstr ""
+
+#: /Library/WebServer/Documents/cmform/req-cv.php:21
+msgid "nom_obligatoire"
+msgstr "Votre nom est obligatoire"
+
+#: /Library/WebServer/Documents/cmform/req-cv.php:25
+msgid "courriel_chars"
+msgstr "Seulement des lettres, chiffres et espace autoris&eacute;s"
+
+#: /Library/WebServer/Documents/cmform/req-cv.php:34
+msgid "courriel_obligatoire"
+msgstr "Votre courriel est obligatoire"
+
+#: /Library/WebServer/Documents/cmform/req-cv.php:37
+msgid "courriel_invalide"
+msgstr "Courriel invalide"
+
+#: /Library/WebServer/Documents/cmform/index.php:19
+#: /Library/WebServer/Documents/cmform/index.php:11
+msgid "Blogue"
+msgstr ""
+
+#: /Library/WebServer/Documents/cmform/index.php:32
+#: /Library/WebServer/Documents/cmform/index.php:33
+msgid "lire_plus"
+msgstr "Lire plus"
+
+#: /Library/WebServer/Documents/cmform/index.php:32
+msgid "posted_on"
+msgstr "Post&eacute; le"

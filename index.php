@@ -1,9 +1,9 @@
 <?php
 require_once("includes/php_utils.php"); 
 require_once('includes/config.php'); 
-// i18n:
 $language = setLanguage();
 ?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,24 +14,40 @@ $language = setLanguage();
 </head>
 <body>
 
+	<!-- TODO:  make this a function -->
+	<a href="index.php?lang=fr"> <?php echo _("Francais"); ?></a>
+	<a href="index.php?lang=en"> <?php echo _("Anglais"); ?> </a>
+
 	<div id="wrapper">
 
 		<h1><?php echo _("Blogue"); ?></h1>
 		<hr />
 
 		<?php
+			$postedOnTr = _("posted_on");
+			$lirePlusTr = _("lire_plus");
 			try {
+				$stmt = $db->query('SELECT * FROM blog_posts_bi WHERE frPostDate IS NOT NULL OR enPostDate IS NOT NULL ORDER BY postID DESC');
 
-				$stmt = $db->query('SELECT postID, postTitle, postDesc, postDate FROM blog_posts ORDER BY postID DESC');
+				$stmt->setFetchMode(PDO::FETCH_CLASS, 'BlogEntry');
 				while ($row = $stmt->fetch()) {
-					$postId = $row['postID'];
-					$postTitle = $row['postTitle'];
-					$postDate = strftime("%d %b %Y %H:%M", strtotime($row['postDate']));
-					$postDesc = $row['postDesc'];
-					$postId = $row['postID'];
-					$postedOnTr = _("posted_on");
-					$lirePlusTr = _("lire_plus");
+					//⁄⁄‚‚echo '<pre>', print_r($row), '</pre>';
+					$postId = $row->postID;
+					$postDate = $row->getPostDate($language);
+					
+					if ($language === ENGLISH) {
+						$postTitle = $row->enTitle;
+						$postDesc = $row->enDesc;
+					}
+					else {
+						$postTitle = $row->frTitle;
+						$postDesc = $row->frDesc;
+					}
 
+					// Add row to session to it can be accessed in other pages
+					$_SESSION[BLOGUE . $postId] = $row;
+
+					if (! empty($postDate)) {
 					print <<< END
 					<div>
 						<h1>
@@ -44,6 +60,7 @@ $language = setLanguage();
 						</p>
 					<div>
 END;
+					}
 /*				
 					echo '<div>';
 					echo '<h1><a href="viewpost.php?id='.$row['postID'].'">'.$row['postTitle'].'</a></h1>';

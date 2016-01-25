@@ -1,5 +1,6 @@
 <?php
 require_once('../includes/config.php');
+require_once('../includes/php_utils.php');
 
 //if not logged in redirect to login page
 if(!$user->is_logged_in()){ header('Location: login.php'); }
@@ -7,7 +8,7 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 //show message from add / edit page
 if(isset($_GET['delpost'])){
 
-	$stmt = $db->prepare('DELETE FROM blog_posts WHERE postID = :postID') ;
+	$stmt = $db->prepare('DELETE FROM blog_posts_bi WHERE postID = :postID') ;
 	$stmt->execute(array(':postID' => $_GET['delpost']));
 
 	header('Location: index.php?action=deleted');
@@ -48,24 +49,29 @@ if(isset($_GET['delpost'])){
 
 	<table>
 	<tr>
-		<th>Title</th>
-		<th>Date</th>
+		<th>French Title</th>
+		<th>English Title</th>
+		<th>French Post Date</th>
+		<th>English Post Date</th>
 		<th>Action</th>
 	</tr>
 	<?php
 		try {
-
-			$stmt = $db->query('SELECT postID, postTitle, postDate FROM blog_posts ORDER BY postID DESC');
-			while($row = $stmt->fetch()){
+			// Prepared Statement ?
+			$stmt = $db->query('SELECT postID, frTitle, enTitle, frPostDate, enPostDate FROM blog_posts_bi ORDER BY postID DESC');
+			$stmt->setFetchMode(PDO::FETCH_CLASS, 'BlogEntry');
+			while($row = $stmt->fetch()) {
 
 				echo '<tr>';
-				echo '<td>'.$row['postTitle'].'</td>';
-				echo '<td>'.date('jS M Y', strtotime($row['postDate'])).'</td>';
+				echo '<td>'.$row->frTitle .'</td>';
+				echo '<td>'.$row->enTitle . '</td>';
+				echo '<td>'. $row->getPostDate(FRENCH) .'</td>';
+				echo '<td>'. $row->getPostDate(ENGLISH) .'</td>';
 				?>
 
 				<td>
-					<a href="edit-post.php?id=<?php echo $row['postID'];?>">Edit</a> |
-					<a href="javascript:delpost('<?php echo $row['postID'];?>','<?php echo $row['postTitle'];?>')">Delete</a>
+					<a href="edit-post.php?id=<?php echo $row->postID;?>">Edit</a> |
+					<a href="javascript:delpost('<?php echo $row->postID;?>','<?php echo $row->getTitles();?>')">Delete</a>
 				</td>
 
 				<?php
