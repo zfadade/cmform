@@ -8,6 +8,7 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 // i18n:
 $language = setLanguage();
 ?>
+
 <!doctype html>
 <html>
 <head>
@@ -29,19 +30,17 @@ $language = setLanguage();
   </script>
 </head>
 <body>
+	<div id="wrapper">
 
-<div id="wrapper">
+		<?php include('menu.php');?>
+		<p><a href="./">Blog Admin Index</a></p>
 
-	<?php include('menu.php');?>
-	<p><a href="./">Blog Admin Index</a></p>
-
-	<h2>Edit Post</h2>
+		<h2>Edit Post</h2>
 
 
 	<?php
 
 	//if form has been submitted process it
-	//if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if (isset($_POST['update']) or isset($_POST['updateAndPost']) )  {
 
 		// echo "SERVER  " . '<bp>';
@@ -123,25 +122,38 @@ $language = setLanguage();
 
 	} catch(PDOException $e) {
 	    echo $e->getMessage();
-	}
+	}	
 
-	?>
+	// THis is needed to call a function from a Heredoc
+	// $formFunc = function($fn) {
+	// 	return $fn;
+	// };
 
-	<form method='post' action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]);?>"> 
-		<input type='hidden' name='postID' value='<?php echo $row->getPostId() ;?>'/>
+	print <<< END
+
+	<form method='post' action="{$hereFunc(htmlspecialchars($_SERVER['PHP_SELF']))}" > 
+
+		<input type='hidden' name='postID' value='{$row->getPostId()}'/>
 
 		<p><label>Title</label><br />
-		<input type='text' name='postTitle' value='<?php echo $row->getTitle($language) ;?>'></p>
+		<input type='text' name='postTitle' value='{$row->getTitle($language)}'>
+		</p>
 
 		<p><label>Description</label><br />
-		<textarea name='postDesc' cols='60' rows='10'><?php echo $row->getDescription($language) ;?></textarea></p>
+		<textarea name='postDesc' cols='60' rows='10'>
+			{$row->getDescription($language)}
+			</textarea></p>
 
-		<p><label>Content</label><br />
-		<textarea name='postCont' cols='60' rows='10'><?php echo $row->getContents($language)?></textarea></p>
+		<p><
+			label>Content</label><br />
+			<textarea name='postCont' cols='60' rows='10'>
+				{$row->getContents($language)}
+			</textarea>
+		</p>
 
 		<p>
-		<input type='submit' name='update' value='Update'>
-		<input type='submit' name='updateAndPost' value='Update and Post'>
+			<input type='submit' name='update' value='Update'>
+			<input type='submit' name='updateAndPost' value='Update and Post'>
 		</p>
 
 	</form>
@@ -150,3 +162,4 @@ $language = setLanguage();
 
 </body>
 </html>	
+END;

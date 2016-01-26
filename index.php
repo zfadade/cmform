@@ -34,16 +34,9 @@ $language = setLanguage();
 					//⁄⁄‚‚echo '<pre>', print_r($row), '</pre>';
 					$postId = $row->postID;
 					$postDate = $row->getPostDate($language);
+					$postTitle = $row->getTitle($language);
+					$postDesc = $row->getDescription($language);
 					
-					if ($language === ENGLISH) {
-						$postTitle = $row->enTitle;
-						$postDesc = $row->enDesc;
-					}
-					else {
-						$postTitle = $row->frTitle;
-						$postDesc = $row->frDesc;
-					}
-
 					// Add row to session to it can be accessed in other pages
 					$_SESSION[BLOGUE . $postId] = $row;
 

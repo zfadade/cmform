@@ -41,6 +41,13 @@ function setLanguage() {
 	return substr($language, 0, 2) === "en" ? ENGLISH : FRENCH;
 }
 
+
+// This is needed to call a function from a Heredoc
+$hereFunc = function($fn) {
+	return $fn;
+};
+
+
 function defaultVal($array, $key, $default) {
     return isset($array[$key]) ? $array[$key] : $default;
 }

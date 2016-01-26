@@ -48,7 +48,6 @@ if(!$user->is_logged_in()){ header('Location: login.php'); }
 			if($password != $passwordConfirm){
 				$error[] = 'Passwords do not match.';
 			}
-
 		}
 		
 
