@@ -5,12 +5,10 @@ class BlogEntry {
 		$frDesc, $enDesc, 
 		$frContents, $enContents,
 		$frPostDate, $enPostDate,
-		$defaultLang,
-		$entry;
+		$defaultLang;
 
 	public function __construct() {
 		$this->defaultLang = FRENCH;
-		$this->entry = "{$this->frTitle}  {$this->enTitle}";
 	}
 
 	public function getPostId() {

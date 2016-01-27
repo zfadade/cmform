@@ -85,7 +85,7 @@ if(isset($_GET['delpost'])){
 	?>
 	</table>
 
-	<p><a href='add-post.php'>Add Post</a></p>
+	<p><a href='edit-post.php'>Add Post</a></p>
 
 </div>
 

@@ -16,18 +16,9 @@ $language = setLanguage();
   <title>Admin - Edit Post</title>
   <link rel="stylesheet" href="../style/normalize.css">
   <link rel="stylesheet" href="../style/main.css">
-  <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
-  <script>
-          tinymce.init({
-              selector: "textarea",
-              plugins: [
-                  "advlist autolink lists link image charmap print preview anchor",
-                  "searchreplace visualblocks code fullscreen",
-                  "insertdatetime media table contextmenu paste"
-              ],
-              toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image"
-          });
-  </script>
+
+  <script "text/javascript" src="/cmform/vendor/tinymce/tinymce/tinymce.min.js"></script>
+  <script "text/javascript"  src="/cmform/js/initTiny.js"></script>
 </head>
 <body>
 	<div id="wrapper">
@@ -46,59 +37,39 @@ $language = setLanguage();
 		// echo "SERVER  " . '<bp>';
 		// var_dump($_SERVER);
 
-		echo  "POST ". '<bp>';
-		var_dump($_POST);
-		$_POST = array_map( 'stripslashes', $_POST );
 
-		//collect form data
-		extract($_POST);
 
 		//very basic validation
-		if($postID ==''){
-			$error[] = 'This post is missing a valid id!.';
-		}
+		// if (empty($postID)) {
+		// 	$error[] = 'This post is missing a valid id!.';
+		// }
 
-		if($postTitle ==''){
-			$error[] = 'Please enter the title.';
-		}
+		// if($postTitle ==''){
+		// 	$error[] = 'Please enter the title.';
+		// }
 
-		if($postDesc ==''){
-			$error[] = 'Please enter the description.';
-		}
+		// if($postDesc ==''){
+		// 	$error[] = 'Please enter the description.';
+		// }
 
-		if($postCont ==''){
-			$error[] = 'Please enter the content.';
-		}
+		// if($postCont ==''){
+		// 	$error[] = 'Please enter the content.';
+		// }
 
-		if(!isset($error)){
-
+		if (!isset($error)) {
 			try {
-
-				echo "Updating form for ", $language;
-				$stmt = $language === ENGLISH ? 
-					$db->prepare('UPDATE blog_posts_bi SET enTitle = :postTitle, enDesc = :postDesc, enContents = :postCont WHERE postID = :postID') 
-					:
-					$db->prepare('UPDATE blog_posts_bi SET frTitle = :postTitle, frDesc = :postDesc, frContents= :postCont WHERE postID = :postID') ;
-
-
-				//insert into database
-				$stmt->execute(array(
-					'postTitle' => $postTitle,
-					'postDesc' => $postDesc,
-					'postCont' => $postCont,
-					'postID' => $postID
-				));
+				insertOrUpdateBlog($db);
 
 				//redirect to index page
 				header('Location: index.php?action=updated');
 				exit;
 
 			} catch(PDOException $e) {
+				//$stmt->debugDumpParams();
 			    echo $e->getMessage();
 			}
 
 		}
-
 	}
 
 	// END OF SUBMIT[] code .......
@@ -110,47 +81,65 @@ $language = setLanguage();
 		}
 	}
 
-	echo "Getting row for postID: ", $_GET['id'], '<br>';
+	$idFromGet = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+	// echo "id from GET: ", $idFromGet, '<br>';
 	try {
 
 		$stmt = $db->prepare('SELECT * FROM blog_posts_bi WHERE postID = :postID');
-		$stmt->bindParam(':postID', $_GET['id']);
+		$stmt->bindParam(':postID', $idFromGet);
 		$stmt->execute();
 		$stmt->setFetchMode(PDO::FETCH_CLASS, 'BlogEntry');
 		$row = $stmt->fetch();
-		var_dump($row);
 
-	} catch(PDOException $e) {
-	    echo $e->getMessage();
+	} catch(Exception $e) {
+		echo $e->getMessage();
 	}	
 
-	// THis is needed to call a function from a Heredoc
-	// $formFunc = function($fn) {
-	// 	return $fn;
-	// };
+	if (empty($row)) {
+		$row = new BlogEntry();
+	}
 
 	print <<< END
 
 	<form method='post' action="{$hereFunc(htmlspecialchars($_SERVER['PHP_SELF']))}" > 
 
-		<input type='hidden' name='postID' value='{$row->getPostId()}'/>
-
-		<p><label>Title</label><br />
-		<input type='text' name='postTitle' value='{$row->getTitle($language)}'>
+		<input type='hidden' name='postID' value="{$row->getPostId()}"/>
+	
+		<h2 id="frTitle">FRAN&Ccedil;AIS</h2>
+		<p>
+			<label>Titre</label><br />
+			<input type='text' name='frTitle' value="{$row->getTitle(FRENCH)}">
 		</p>
 
-		<p><label>Description</label><br />
-		<textarea name='postDesc' cols='60' rows='10'>
-			{$row->getDescription($language)}
-			</textarea></p>
+		<p>
+			<label>D&eacute;scription</label><br />
+			<input type='text' name='frDesc' value="{$row->getDescription(FRENCH)}" />
+		</p>
 
-		<p><
-			label>Content</label><br />
-			<textarea name='postCont' cols='60' rows='10'>
-				{$row->getContents($language)}
+		<p>
+			<label>Contenu</label><br />
+			<textarea name='frContents' class="frTextArea"  cols='60' rows='10'>
+				{$row->getContents(FRENCH)}
 			</textarea>
 		</p>
 
+		<h2 id="enTitle">ENGLISH</h2>
+		<p>
+			<label>Title</label><br />
+			<input type='text' name='enTitle' value="{$row->getTitle(ENGLISH)}">
+		</p>
+
+		<p>
+			<label>Description</label><br />
+			<input type='text' name='enDesc' value="{$row->getDescription(ENGLISH)}" />
+		</p>
+
+		<p>
+			<label>Contents</label><br />
+			<textarea name='enContents' class="enTextArea"  cols='60' rows='10'>
+				{$row->getContents(ENGLISH)}
+			</textarea>
+		</p>
 		<p>
 			<input type='submit' name='update' value='Update'>
 			<input type='submit' name='updateAndPost' value='Update and Post'>
@@ -163,3 +152,49 @@ $language = setLanguage();
 </body>
 </html>	
 END;
+
+
+function insertOrUpdateBlog($db) {
+	echo  "POST ". '<bp>';
+	var_dump($_POST);
+
+	// WHY ???
+	$_POST = array_map( 'stripslashes', $_POST );
+
+	//collect form data
+	extract($_POST);
+
+	$db->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING );
+	if (empty($postID)) {
+		// Insert new row into DB
+		$stmt = $db->prepare("INSERT INTO blog_posts_bi (frTitle, enTitle, frDesc, enDesc, frContents, enContents) 
+			VALUES (:frTitle, :enTitle, :frDesc, :enDesc, :frContents, :enContents)");
+
+		// insert new row into DB
+		$stmt->execute(array(
+			'frTitle' => $frTitle,
+			'enTitle' => $enTitle,
+			'frDesc' => $frDesc,
+			'enDesc' => $enDesc,
+			'frContents' => $frContents,
+			'enContents' => $enContents ));
+
+	}
+	else {
+		// Update existing in DB
+		$stmt = $db->prepare('UPDATE blog_posts_bi SET 
+				frTitle = :frTitle, enTitle = :enTitle, 
+				frDesc = :frDesc, enDesc = :enDesc, 
+				frContents = :frContents, enContents = :enContents, 
+				WHERE postID = :postID');
+
+		$stmt->execute(array(
+			'frTitle' => $frTitle,
+			'enTitle' => $enTitle,
+			'frDesc' => $frDesc,
+			'enDesc' => $enDesc,
+			'frContents' => $frContents,
+			'enContents' => $enContents,
+			'postID' => $postID ));
+}
+}
